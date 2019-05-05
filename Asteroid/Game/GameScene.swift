@@ -14,8 +14,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let BackgroundColor: UIColor = UIColor(red: 51.0/255.0, green: 86.0/255.0, blue: 137.0/255.0, alpha: 1.0)
     
     var player: SKSpriteNode!
-    
+    var gameOver = false
     var sharkSwimmingFrames: [SKTexture] = []
+    var subMovingFrames: [SKTexture] = []
+    var subBossScore = 0 //Score at which subs can appear
+
     var laserFiringFrames: [SKTexture] = []
     
     var scoreLabel: SKLabelNode!
@@ -46,12 +49,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.physicsWorld.gravity = CGVector(dx: 0, dy: 0)
         self.physicsWorld.contactDelegate = self
         
-        self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame)
+        //self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame) //removed since it ibhibits wraparound,
+        //updated to unique CGRect w/ padding
+        let padding = CGFloat(67)
+        let frameWithPadding: CGRect = CGRect(x: self.frame.minX - padding, y: self.frame.minY - padding, width: self.frame.width + (padding * 2), height: self.frame.height + (padding * 2))
+        self.physicsBody = SKPhysicsBody(edgeLoopFrom: frameWithPadding)
         self.physicsBody?.categoryBitMask = wallCategory
+        self.physicsBody?.friction = 1
         
         // Sets up animation textures
         buildShark()
         buildLaser()
+        buildSub()
         
         // loads whole game scene. Separated to easily reset game
         loadGame()
@@ -59,10 +68,30 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     override func update(_ currentTime: TimeInterval) {
-        // Called before each frame is rendered
+        infinityWrapUpdater(player)
+        
+    }
+    
+    func infinityWrapUpdater(_ obj: SKSpriteNode){
+        let x = obj.position.x
+        let y = obj.position.y
+        let pad = CGFloat(30)
+        if(x >= self.frame.maxX+pad){
+            obj.position.x = self.frame.minX - pad
+        }
+        else if (x <= self.frame.minX-pad){
+            obj.position.x = self.frame.maxX + pad
+        }
+        if(y >= self.frame.maxY+pad){
+            obj.position.y = self.frame.minY - pad
+        }
+        else if (y <= self.frame.minY-pad){
+            obj.position.y = self.frame.maxY + pad
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if (!gameOver){ //prevents shooting at time of death
         if let touch = touches.reversed().first {
             
             // get tap and ship locations in the scene
@@ -77,6 +106,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             
             player.physicsBody?.applyImpulse(posVariables.theVector)
             fireLaser(tapLocation: tapLocation)
+        }
         }
     }
     
@@ -136,7 +166,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         laserNode.physicsBody?.usesPreciseCollisionDetection = true
         
         // Plays fired laser sound
-//        self.run(SKAction.playSoundFileNamed("laser.mp3", waitForCompletion: false))
+        self.run(SKAction.playSoundFileNamed("laser.mp3", waitForCompletion: false))
         
         self.addChild(laserNode)
         
@@ -152,6 +182,39 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         laserNode.run(SKAction.sequence(actionArray))
     }
     
+    func fireTorpedoAtPlayer(enemy2: SKSpriteNode){
+        let torp = SKSpriteNode(imageNamed: "torpedo")
+        torp.setScale(2.5)
+        torp.position.x = enemy2.position.x
+        torp.position.y = enemy2.position.y
+        torp.zRotation = enemy2.zRotation
+        
+        torp.physicsBody = SKPhysicsBody(texture: torp.texture!, size: torp.size)
+        
+        torp.physicsBody?.isDynamic = true
+        torp.physicsBody?.categoryBitMask = enemyCategory
+        torp.physicsBody?.contactTestBitMask = laserCategory
+        torp.physicsBody?.collisionBitMask = wallCategory
+        torp.physicsBody?.usesPreciseCollisionDetection = true
+        
+        //self.run(SKAction.playSoundFileNamed("laser.mp3", waitForCompletion: false)) //TODO: replace w/ torpedo sounds
+        
+        self.addChild(torp)
+        
+        let animationDuration: TimeInterval = 1.75
+        
+        var actionArray = [SKAction]()
+        actionArray.append(SKAction.move(to: CGPoint(x: player.position.x, y:  player.position.y), duration: animationDuration))
+        actionArray.append(SKAction.run {
+            self.explodeAt(laserNode: torp, position: torp.position)
+        })
+        //actionArray.append(SKAction.removeFromParent())
+        
+        torp.run(SKAction.fadeIn(withDuration: 0.35)) //fade in occurs as torpedo shoots
+        torp.run(SKAction.sequence(actionArray))
+
+    }
+    
     /* Spawns new enemy - ! need to have them spawn off the screen !
      * Currently they spawn in the 4 corners of the screen
      * Want to adjust so they float in from anywhere but having problems with collisonBitMask (line 179)
@@ -159,6 +222,43 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
      * Potential fix is to not set that bit mask until after they float in
      */
     @objc func addEnemy() {
+        let bossRandomizer = Bool.random() && Bool.random() //boss appears 1/4 of time after subBossScore threshold met
+        
+        if(score >= subBossScore && bossRandomizer){
+            let enemy2 = SKSpriteNode(texture: subMovingFrames[0])
+            enemy2.setScale(3.5)
+            
+            self.enemySpawnPositions = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: self.enemySpawnPositions) as! [CGPoint]
+            enemy2.position = enemySpawnPositions[0]
+            
+            enemy2.physicsBody = SKPhysicsBody(texture: enemy2.texture!, size: enemy2.size)
+            enemy2.physicsBody?.isDynamic = true
+            enemy2.physicsBody?.categoryBitMask = self.enemyCategory
+            enemy2.physicsBody?.contactTestBitMask = self.laserCategory
+            enemy2.physicsBody?.collisionBitMask = wallCategory
+
+            let randomEnemyPositionX = GKRandomDistribution(lowestValue: Int(self.frame.minX), highestValue: Int(self.frame.maxX))
+            let randomEnemyPositionY = GKRandomDistribution(lowestValue: Int(self.frame.minY), highestValue: Int(self.frame.maxY))
+            let positionX = CGFloat(randomEnemyPositionX.nextInt())
+            let positionY = CGFloat(randomEnemyPositionY.nextInt())
+            
+
+            
+            self.addChild(enemy2)
+
+            
+            let impulseVector = calcVector(firstLocation: enemy2.position, secondLocation: CGPoint(x: positionX, y: positionY))
+            enemy2.zRotation = impulseVector.theAngle
+
+            enemy2.physicsBody?.applyImpulse(impulseVector.theVector)
+            
+            animateSub(enemy2: enemy2)
+            
+            fireTorpedoAtPlayer(enemy2: enemy2)
+            
+            
+        }
+        else{
 //        enemyQueue.async {
             self.possibleEnemies = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: self.possibleEnemies) as! [String]
             
@@ -184,7 +284,10 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let impulseVector = calcVector(firstLocation: enemy.position, secondLocation: CGPoint(x: positionX, y: positionY))
         
             enemy.physicsBody?.applyImpulse(impulseVector.theVector)
+        }
+
 //        }
+        
     }
     
     // Runs when contact is detected
@@ -207,6 +310,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 laserDidHitEnemy(laserNode: laserNode as! SKSpriteNode, enemyNode: enemyNode as! SKSpriteNode)
             }
         }
+       
+    }
+    
+    func explodeAt  (laserNode: SKSpriteNode, position: CGPoint){
+        let explosion = SKSpriteNode(fileNamed: "Explosion")!
+        explosion.setScale(CGFloat(0.5))
+        explosion.position = position
+        self.addChild(explosion)
+
+        self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
+        
+        laserNode.removeFromParent()
+        
+        self.run(SKAction.wait(forDuration: 2)) {
+            explosion.removeFromParent()
+        }
+
     }
     
     // Handles enemy and player explosions
@@ -220,7 +340,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.addChild(explosion)
             
             // Explosion sound
-//            self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
+            self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
             
             laserNode.removeFromParent()
             enemyNode.removeFromParent()
@@ -235,10 +355,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.addChild(explosion)
             
             // Explosion sound
-//            self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
+            self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
             
             laserNode.removeFromParent()
             enemyNode.removeFromParent()
+            gameOver = true
             
             // Game Over!
             self.run(SKAction.wait(forDuration: 2)) {
@@ -270,10 +391,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // Set up player
         player = SKSpriteNode(texture: sharkSwimmingFrames[0])
-        player.setScale(2)
+        player.setScale(2.2)
         player.position = CGPoint(x: 0, y: 0)
         player.physicsBody = SKPhysicsBody(texture: player.texture!, size: player.size)
         player.physicsBody?.affectedByGravity = false
+        player.physicsBody?.friction = 1
+        
         player.physicsBody?.collisionBitMask = wallCategory
         player.physicsBody?.categoryBitMask = laserCategory
         self.addChild(player)
@@ -338,6 +461,29 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                              resize: false,
                              restore: true)),
                  withKey:"firingLaser")
+    }
+    
+    // builds textures for sub animation
+    func buildSub() {
+        let subAnimatedAtlas = SKTextureAtlas(named: "subImages")
+        var moveFrames: [SKTexture] = []
+        
+        let numImages = subAnimatedAtlas.textureNames.count
+        for i in 1...numImages {
+            let subTextureName = "sub\(i)"
+            moveFrames.append(subAnimatedAtlas.textureNamed(subTextureName))
+        }
+        subMovingFrames = moveFrames
+    }
+    
+    // starts sub animation
+    func animateSub(enemy2: SKSpriteNode) {
+        enemy2.run(SKAction.repeatForever(
+            SKAction.animate(with: subMovingFrames,
+                             timePerFrame: 0.15,
+                             resize: false,
+                             restore: true)),
+                   withKey:"movingInPlaceSub")
     }
     
 }
