@@ -12,6 +12,7 @@ import GameplayKit
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
     let BackgroundColor: UIColor = UIColor(red: 51.0/255.0, green: 86.0/255.0, blue: 137.0/255.0, alpha: 1.0)
+   // var background = SKSpriteNode()
     
     var player: SKSpriteNode!
     var gameOver = false
@@ -40,10 +41,44 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     // Might wanna change enemy spawning to its own thread
     var enemyQueue = DispatchQueue(label: "enemy-queue")
     
+  
+    func createWater(){
+        //self.backgroundColor = BackgroundColor
+        let background = SKSpriteNode(imageNamed: "water")
+        let background2 = SKSpriteNode(imageNamed: "water")
+
+        
+        background.position = CGPoint(x: 0, y: 0)
+        background.size = self.size
+        background2.position = CGPoint(x: background.size.width, y: 0)
+        background2.size = self.size
+        addChild(background)
+        background2.xScale = -1
+        //background2.yScale = -1
+        addChild(background2)
+        background.zPosition = -40
+        background2.zPosition = -40
+        
+        animatebg(background: background)
+        animatebg(background: background2)
+
+        
+        
+    }
+    func animatebg(background: SKSpriteNode){
+        let moveLeft = SKAction.moveBy(x: -background.size.width, y: 0, duration: 100) //change duration to v long after completion
+        let reset = SKAction.moveBy(x: background.size.width, y: 0, duration: 100)
+        
+        let moveLoop = SKAction.sequence([moveLeft, reset])
+        let moveForever = SKAction.repeatForever(moveLoop)
+        
+        background.run(moveForever)
+    }
     
     override func didMove(to view: SKView) {
         
-        self.backgroundColor = BackgroundColor
+       createWater()
+        
         
         // Set physics of environment
         self.physicsWorld.gravity = CGVector(dx: 0, dy: 0)
@@ -166,7 +201,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         laserNode.physicsBody?.usesPreciseCollisionDetection = true
         
         // Plays fired laser sound
-        self.run(SKAction.playSoundFileNamed("laser.mp3", waitForCompletion: false))
+      //  self.run(SKAction.playSoundFileNamed("laser.mp3", waitForCompletion: false))
         
         self.addChild(laserNode)
         
@@ -182,11 +217,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         laserNode.run(SKAction.sequence(actionArray))
     }
     
-    func fireTorpedoAtPlayer(enemy2: SKSpriteNode){
+    func fireTorpedoAtPlayer(enemy2: SKSpriteNode, impulseVector: CGVector){
         let torp = SKSpriteNode(imageNamed: "torpedo")
         torp.setScale(2.5)
-        torp.position.x = enemy2.position.x
-        torp.position.y = enemy2.position.y
+        torp.position.x = enemy2.position.x + impulseVector.dx
+        torp.position.y = enemy2.position.y + impulseVector.dy
         torp.zRotation = enemy2.zRotation
         
         torp.physicsBody = SKPhysicsBody(texture: torp.texture!, size: torp.size)
@@ -202,15 +237,13 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.addChild(torp)
         
         let animationDuration: TimeInterval = 1.75
-        
         var actionArray = [SKAction]()
+        actionArray.append(SKAction.fadeIn(withDuration: 0.35))
         actionArray.append(SKAction.move(to: CGPoint(x: player.position.x, y:  player.position.y), duration: animationDuration))
         actionArray.append(SKAction.run {
             self.explodeAt(laserNode: torp, position: torp.position)
         })
-        //actionArray.append(SKAction.removeFromParent())
         
-        torp.run(SKAction.fadeIn(withDuration: 0.35)) //fade in occurs as torpedo shoots
         torp.run(SKAction.sequence(actionArray))
 
     }
@@ -222,7 +255,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
      * Potential fix is to not set that bit mask until after they float in
      */
     @objc func addEnemy() {
-        let bossRandomizer = Bool.random() && Bool.random() //boss appears 1/4 of time after subBossScore threshold met
+        let bossRandomizer =  Bool.random() && Bool.random() //boss appears 1/4 of time after subBossScore threshold met
         
         if(score >= subBossScore && bossRandomizer){
             let enemy2 = SKSpriteNode(texture: subMovingFrames[0])
@@ -237,24 +270,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             enemy2.physicsBody?.contactTestBitMask = self.laserCategory
             enemy2.physicsBody?.collisionBitMask = wallCategory
 
-            let randomEnemyPositionX = GKRandomDistribution(lowestValue: Int(self.frame.minX), highestValue: Int(self.frame.maxX))
-            let randomEnemyPositionY = GKRandomDistribution(lowestValue: Int(self.frame.minY), highestValue: Int(self.frame.maxY))
-            let positionX = CGFloat(randomEnemyPositionX.nextInt())
-            let positionY = CGFloat(randomEnemyPositionY.nextInt())
+            //let randomEnemyPositionX = GKRandomDistribution(lowestValue: Int(self.frame.minX), highestValue: Int(self.frame.maxX))
+            //let randomEnemyPositionY = GKRandomDistribution(lowestValue: Int(self.frame.minY), highestValue: Int(self.frame.maxY))
+            //let positionX = CGFloat(randomEnemyPositionX.nextInt())
+           // let positionY = CGFloat(randomEnemyPositionY.nextInt())
             
 
             
             self.addChild(enemy2)
 
             
-            let impulseVector = calcVector(firstLocation: enemy2.position, secondLocation: CGPoint(x: positionX, y: positionY))
+            let impulseVector = calcVector(firstLocation: enemy2.position, secondLocation: CGPoint(x: player.position.x, y: player.position.y))
             enemy2.zRotation = impulseVector.theAngle
 
             enemy2.physicsBody?.applyImpulse(impulseVector.theVector)
             
-            animateSub(enemy2: enemy2)
+            animateSub(enemy2: enemy2, impulseVector: impulseVector.theVector)
             
-            fireTorpedoAtPlayer(enemy2: enemy2)
             
             
         }
@@ -284,11 +316,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let impulseVector = calcVector(firstLocation: enemy.position, secondLocation: CGPoint(x: positionX, y: positionY))
         
             enemy.physicsBody?.applyImpulse(impulseVector.theVector)
+            
+            
+            animateTrash(enemy: enemy)
+            
         }
 
 //        }
         
     }
+    
+    
     
     // Runs when contact is detected
     func didBegin(_ contact: SKPhysicsContact) {
@@ -314,19 +352,20 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func explodeAt  (laserNode: SKSpriteNode, position: CGPoint){
+        if  (!gameOver){
         let explosion = SKSpriteNode(fileNamed: "Explosion")!
         explosion.setScale(CGFloat(0.5))
         explosion.position = position
         self.addChild(explosion)
 
-        self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
+        //self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
         
         laserNode.removeFromParent()
         
         self.run(SKAction.wait(forDuration: 2)) {
             explosion.removeFromParent()
         }
-
+        }
     }
     
     // Handles enemy and player explosions
@@ -340,7 +379,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.addChild(explosion)
             
             // Explosion sound
-            self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
+            //self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
             
             laserNode.removeFromParent()
             enemyNode.removeFromParent()
@@ -355,7 +394,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             self.addChild(explosion)
             
             // Explosion sound
-            self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
+           // self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
             
             laserNode.removeFromParent()
             enemyNode.removeFromParent()
@@ -439,6 +478,15 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                              restore: true)),
                  withKey:"swimmingInPlaceShark")
     }
+    func animateTrash(enemy: SKSpriteNode){
+        var actionArray = [SKAction]()
+        actionArray.append(SKAction.wait(forDuration: 10))
+        actionArray.append(SKAction.fadeOut(withDuration: 0.25))
+        actionArray.append(SKAction.run {
+            enemy.removeFromParent()
+            self.score -= 3 // remove for trash littered
+        })
+    }
     
     // builds textures for laser animation
     func buildLaser() {
@@ -477,13 +525,32 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     // starts sub animation
-    func animateSub(enemy2: SKSpriteNode) {
+    func animateSub(enemy2: SKSpriteNode, impulseVector: CGVector) {
         enemy2.run(SKAction.repeatForever(
             SKAction.animate(with: subMovingFrames,
                              timePerFrame: 0.15,
                              resize: false,
                              restore: true)),
                    withKey:"movingInPlaceSub")
+        
+        
+        var actionArray = [SKAction]()
+        actionArray.append(SKAction.wait(forDuration: 1 ))
+        
+        /*actionArray.append(SKAction.run{
+            let impulseVector = self.calcVector(firstLocation: enemy2.position, secondLocation: CGPoint(x: self.player.position.x, y: self.player.position.y))
+            let r = impulseVector.theAngle
+            SKAction.rotate(byAngle: r, duration: 1)
+            })*/ //failed attempt to rotate missile before firing
+       
+        actionArray.append(SKAction.run {
+            self.fireTorpedoAtPlayer(enemy2: enemy2, impulseVector: impulseVector)
+        })
+        actionArray.append(SKAction.wait(forDuration: 200/Double(score) )) //wait decreases w/ score increase
+
+        enemy2.run(SKAction.repeatForever(SKAction.sequence(actionArray)))
+        
+    
     }
     
 }
