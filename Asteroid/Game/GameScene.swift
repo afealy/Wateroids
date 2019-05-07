@@ -63,11 +63,11 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         addChild(background2)
         
         
-        animatebg1(background: background1, isB1: true)
-        animatebg2(background: background2, isB1: false)
+        animatebg1(background: background1)
+        animatebg2(background: background2)
     }
     
-    func animatebg1(background: SKSpriteNode, isB1: Bool){
+    func animatebg1(background: SKSpriteNode){
         let width = background.size.width
         
         let moveLeftInitial = SKAction.moveTo(x: -width, duration: 100)
@@ -82,7 +82,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         background.run(seq)
     }
     
-    func animatebg2(background: SKSpriteNode, isB1: Bool){
+    func animatebg2(background: SKSpriteNode){
         let width = background.size.width
 
         let reset = SKAction.moveTo(x: width, duration: 0)
