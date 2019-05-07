@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		C405216522755B1300AF268D /* CreateUser.swift in Sources */ = {isa = PBXBuildFile; fileRef = C405216422755B1300AF268D /* CreateUser.swift */; };
+		C4052167227564AE00AF268D /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = C4052166227564AE00AF268D /* GoogleService-Info.plist */; };
+		C40521692275691000AF268D /* CreateUser.sks in Resources */ = {isa = PBXBuildFile; fileRef = C40521682275691000AF268D /* CreateUser.sks */; };
 		C407030A226F9EB8008F36D2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C4070308226F9EB8008F36D2 /* Assets.xcassets */; };
 		C4B81782226BFD18009802B6 /* laser.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = C4B81780226BFD17009802B6 /* laser.mp3 */; };
 		C4B81783226BFD18009802B6 /* explosion.mp3 in Resources */ = {isa = PBXBuildFile; fileRef = C4B81781226BFD17009802B6 /* explosion.mp3 */; };
@@ -25,9 +28,13 @@
 		C4E0F77A226806F100D6F6E1 /* GameViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E0F779226806F100D6F6E1 /* GameViewController.swift */; };
 		C4E0F77D226806F100D6F6E1 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C4E0F77B226806F100D6F6E1 /* Main.storyboard */; };
 		C4E0F782226806F300D6F6E1 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = C4E0F780226806F300D6F6E1 /* LaunchScreen.storyboard */; };
+		C4E5C878227B66D8006668BE /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = C4E5C877227B66D8006668BE /* User.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		C405216422755B1300AF268D /* CreateUser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CreateUser.swift; sourceTree = "<group>"; };
+		C4052166227564AE00AF268D /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
+		C40521682275691000AF268D /* CreateUser.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = CreateUser.sks; sourceTree = "<group>"; };
 		C4070308226F9EB8008F36D2 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C4B81780226BFD17009802B6 /* laser.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = laser.mp3; sourceTree = "<group>"; };
 		C4B81781226BFD17009802B6 /* explosion.mp3 */ = {isa = PBXFileReference; lastKnownFileType = audio.mp3; path = explosion.mp3; sourceTree = "<group>"; };
@@ -48,6 +55,7 @@
 		C4E0F77C226806F100D6F6E1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		C4E0F781226806F300D6F6E1 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		C4E0F783226806F400D6F6E1 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		C4E5C877227B66D8006668BE /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -138,17 +146,29 @@
 				C4E0F779226806F100D6F6E1 /* GameViewController.swift */,
 				C4E0F775226806F100D6F6E1 /* Actions.sks */,
 				C4E0F77B226806F100D6F6E1 /* Main.storyboard */,
-				C4B817A1226C6A3F009802B6 /* Game Over */,
-				C4B8179C226C66E1009802B6 /* High Scores */,
+				C4E5C877227B66D8006668BE /* User.swift */,
+				C4E5C8792280F7A3006668BE /* Create User */,
 				C4B81797226C2AD5009802B6 /* Main Menu */,
 				C4B81790226C14FA009802B6 /* Game */,
+				C4B817A1226C6A3F009802B6 /* Game Over */,
+				C4B8179C226C66E1009802B6 /* High Scores */,
 				C4B81792226C1529009802B6 /* Sounds */,
 				C4B81791226C1517009802B6 /* Emmitters */,
 				C4E0F780226806F300D6F6E1 /* LaunchScreen.storyboard */,
+				C4052166227564AE00AF268D /* GoogleService-Info.plist */,
 				C4E0F783226806F400D6F6E1 /* Info.plist */,
 				C4B8178B226BFE1F009802B6 /* Assets.xcassets */,
 			);
 			path = Asteroid;
+			sourceTree = "<group>";
+		};
+		C4E5C8792280F7A3006668BE /* Create User */ = {
+			isa = PBXGroup;
+			children = (
+				C405216422755B1300AF268D /* CreateUser.swift */,
+				C40521682275691000AF268D /* CreateUser.sks */,
+			);
+			path = "Create User";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -209,7 +229,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C4052167227564AE00AF268D /* GoogleService-Info.plist in Resources */,
 				C4E0F77D226806F100D6F6E1 /* Main.storyboard in Resources */,
+				C40521692275691000AF268D /* CreateUser.sks in Resources */,
 				C4B81794226C159E009802B6 /* MainMenuScene.sks in Resources */,
 				C4E0F774226806F100D6F6E1 /* GameScene.sks in Resources */,
 				C407030A226F9EB8008F36D2 /* Assets.xcassets in Resources */,
@@ -235,8 +257,10 @@
 				C4E0F778226806F100D6F6E1 /* GameScene.swift in Sources */,
 				C4E0F77A226806F100D6F6E1 /* GameViewController.swift in Sources */,
 				C4B81796226C1638009802B6 /* MainMenuScene.swift in Sources */,
+				C4E5C878227B66D8006668BE /* User.swift in Sources */,
 				C4B817A0226C6742009802B6 /* GameOverScene.swift in Sources */,
 				C4E0F772226806F100D6F6E1 /* AppDelegate.swift in Sources */,
+				C405216522755B1300AF268D /* CreateUser.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

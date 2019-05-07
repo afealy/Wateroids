@@ -14,33 +14,70 @@ class GameViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        if let view = self.view as! SKView? {
-            // Load the SKScene from 'GameScene.sks'
-            if let scene = GameScene(fileNamed: "MainMenuScene") {
+//        UserDefaults.standard.removeObject(forKey: "documentid")
+//        print(UserDefaults.standard.string(forKey: "documentid") ?? "No Document ID found!")
+//        if let docID = UserDefaults.standard.string(forKey: "documentid") {
+        if let username = UserDefaults.standard.string(forKey: "username") {
+            
+            let user = User(username: username)
+            user.userDefaultGets()
+            
+            if let view = self.view as! SKView? {
+                // Load the SKScene from 'GameScene.sks'
+                if let scene = MainMenuScene(fileNamed: "MainMenuScene") {
+                    
+                    scene.user = user
+                    
+                    view.showsFPS = true
+                    view.showsNodeCount = true
+                    
+                    /* Sprite Kit applies additional optimizations to improve rendering performance */
+                    view.ignoresSiblingOrder = true
+                    
+                    // Remove all children before scene loads
+                    scene.removeAllChildren()
+                    
+                    /* Set the scale mode to scale to fit the window */
+                    scene.size = view.bounds.size
+                    scene.scaleMode = .aspectFill
+                    
+                    // Present the scene
+                    view.presentScene(scene)
+                }
+                
+                view.ignoresSiblingOrder = true
                 
                 view.showsFPS = true
                 view.showsNodeCount = true
-                
-                /* Sprite Kit applies additional optimizations to improve rendering performance */
+            }
+        } else {
+            if let view = self.view as! SKView? {
+                // Load the SKScene from 'GameScene.sks'
+                if let scene = CreateUser(fileNamed: "CreateUser") {
+                    
+                    view.showsFPS = true
+                    view.showsNodeCount = true
+                    
+                    /* Sprite Kit applies additional optimizations to improve rendering performance */
+                    view.ignoresSiblingOrder = true
+                    
+                    // Remove all children before scene loads
+                    scene.removeAllChildren()
+                    
+                    /* Set the scale mode to scale to fit the window */
+                    scene.size = view.bounds.size
+                    scene.scaleMode = .aspectFill
+                    
+                    // Present the scene
+                    view.presentScene(scene)
+                }
                 view.ignoresSiblingOrder = true
                 
-                // Remove all children before scene loads
-                scene.removeAllChildren()
-                
-                /* Set the scale mode to scale to fit the window */
-                scene.size = view.bounds.size
-                scene.scaleMode = .aspectFill
-
-                // Present the scene
-                view.presentScene(scene)
+                view.showsFPS = true
+                view.showsNodeCount = true
             }
-            
-            view.ignoresSiblingOrder = true
-            
-            view.showsFPS = true
-            view.showsNodeCount = true
         }
+
     }
 
     override var shouldAutorotate: Bool {

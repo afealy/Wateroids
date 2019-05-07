@@ -12,18 +12,24 @@ class GameOverScene: SKScene {
     
     let BackgroundColor: UIColor = UIColor(red: 51.0/255.0, green: 86.0/255.0, blue: 137.0/255.0, alpha: 1.0)
     
+    var user: User!
+    
     var titleLabel: SKLabelNode!
     var scoreLabel: SKLabelNode!
+    var coinLabel: SKLabelNode!
+    var totalCoinsLabel: SKLabelNode!
     var newGameButton: SKSpriteNode!
     var highScoresButton: SKSpriteNode!
     
     var score:Int = 0
+    var coins:Int = 0
     
     override func didMove(to view: SKView) {
         
         self.backgroundColor = BackgroundColor
         
-        highScoreCache.save(score)
+        var myCoins = user.coins!
+        user.saveScore(score)
         
         // Set up game title label
         titleLabel = SKLabelNode(text: "Game Over!")
@@ -41,6 +47,27 @@ class GameOverScene: SKScene {
         scoreLabel.fontColor = .white
         
         self.addChild(scoreLabel)
+        
+        coins = Int(score/10)
+        myCoins += coins
+        user.coins = myCoins
+        user.userDefaultSaves()
+        
+        coinLabel = SKLabelNode(text: "Coins Earned: \(coins)")
+        coinLabel.position = CGPoint(x: self.frame.size.width/2, y: self.frame.size.height-250)
+        coinLabel.fontName = "AmericanTypewriter-Bold"
+        coinLabel.fontSize = 24
+        coinLabel.fontColor = .white
+        
+        self.addChild(coinLabel)
+        
+        totalCoinsLabel = SKLabelNode(text: "Total Coins: \(myCoins)")
+        totalCoinsLabel.position = CGPoint(x: self.frame.size.width/2, y: self.frame.size.height-300)
+        totalCoinsLabel.fontName = "AmericanTypewriter-Bold"
+        totalCoinsLabel.fontSize = 24
+        totalCoinsLabel.fontColor = .white
+        
+        self.addChild(totalCoinsLabel)
         
         newGameButton = SKSpriteNode(imageNamed: "newGameButton_unclicked")
         newGameButton.position = CGPoint(x: self.frame.size.width/2, y: self.frame.size.height/2)
@@ -82,6 +109,7 @@ class GameOverScene: SKScene {
                 if firstNode == newGameButton {
                     newGameButton.texture = SKTexture(imageNamed: "newGameButton_unclicked")
                     if let gameScene = GameScene(fileNamed: "GameScene") {
+                        gameScene.user = user
                         self.run(SKAction.wait(forDuration: 0.3)) {
                             self.view?.presentScene(gameScene, transition: transition)
                         }
@@ -89,6 +117,7 @@ class GameOverScene: SKScene {
                 } else if firstNode == highScoresButton {
                     highScoresButton.texture = SKTexture(imageNamed: "highScoresButton_unclicked")
                     let highScoresScene = HighScoresScene(size: self.size)
+                    highScoresScene.user = user
                     self.run(SKAction.wait(forDuration: 0.3)) {
                         self.view?.presentScene(highScoresScene, transition: transition)
                     }
@@ -109,6 +138,7 @@ class GameOverScene: SKScene {
                 if firstNode == newGameButton {
                     newGameButton.texture = SKTexture(imageNamed: "newGameButton_unclicked")
                     if let gameScene = GameScene(fileNamed: "GameScene") {
+                        gameScene.user = user
                         self.run(SKAction.wait(forDuration: 0.3)) {
                             self.view?.presentScene(gameScene, transition: transition)
                         }
@@ -116,6 +146,7 @@ class GameOverScene: SKScene {
                 } else if firstNode == highScoresButton {
                     highScoresButton.texture = SKTexture(imageNamed: "highScoresButton_unclicked")
                     let highScoresScene = HighScoresScene(size: self.size)
+                    highScoresScene.user = user
                     self.run(SKAction.wait(forDuration: 0.3)) {
                         self.view?.presentScene(highScoresScene, transition: transition)
                     }

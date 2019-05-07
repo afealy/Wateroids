@@ -14,6 +14,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     let BackgroundColor: UIColor = UIColor(red: 51.0/255.0, green: 86.0/255.0, blue: 137.0/255.0, alpha: 1.0)
    // var background = SKSpriteNode()
     
+    var user: User!
+    
     var player: SKSpriteNode!
     var gameOver = false
     var sharkSwimmingFrames: [SKTexture] = []
@@ -61,10 +63,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         animatebg(background: background)
         animatebg(background: background2)
-
-        
-        
     }
+    
     func animatebg(background: SKSpriteNode){
         let moveLeft = SKAction.moveBy(x: -background.size.width, y: 0, duration: 100) //change duration to v long after completion
         let reset = SKAction.moveBy(x: background.size.width, y: 0, duration: 100)
@@ -78,7 +78,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     override func didMove(to view: SKView) {
         
        createWater()
-        
         
         // Set physics of environment
         self.physicsWorld.gravity = CGVector(dx: 0, dy: 0)
@@ -127,21 +126,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if (!gameOver){ //prevents shooting at time of death
-        if let touch = touches.reversed().first {
-            
-            // get tap and ship locations in the scene
-            let tapLocation = touch.location(in: self)
-            let playerLocation = player.position
-            
-//            print("tap: \(tapLocation)")
-//            print("player: \(playerLocation)")
+            if let touch = touches.reversed().first {
+                
+                // get tap and ship locations in the scene
+                let tapLocation = touch.location(in: self)
+                let playerLocation = player.position
+                
+    //            print("tap: \(tapLocation)")
+    //            print("player: \(playerLocation)")
 
-            let posVariables = calcVector(firstLocation: playerLocation, secondLocation: tapLocation)
-            player.zRotation = posVariables.theAngle
-            
-            player.physicsBody?.applyImpulse(posVariables.theVector)
-            fireLaser(tapLocation: tapLocation)
-        }
+                let posVariables = calcVector(firstLocation: playerLocation, secondLocation: tapLocation)
+                player.zRotation = posVariables.theAngle
+                
+                player.physicsBody?.applyImpulse(posVariables.theVector)
+                fireLaser(tapLocation: tapLocation)
+            }
         }
     }
     
@@ -256,77 +255,64 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
      */
     @objc func addEnemy() {
         let bossRandomizer =  Bool.random() && Bool.random() //boss appears 1/4 of time after subBossScore threshold met
-        
-        if(score >= subBossScore && bossRandomizer){
-            let enemy2 = SKSpriteNode(texture: subMovingFrames[0])
+        enemyQueue.async {
+            if(self.score >= self.subBossScore && bossRandomizer){
+            
+                let enemy2 = SKSpriteNode(texture: self.subMovingFrames[0])
             enemy2.setScale(3.5)
             
             self.enemySpawnPositions = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: self.enemySpawnPositions) as! [CGPoint]
-            enemy2.position = enemySpawnPositions[0]
+                enemy2.position = self.enemySpawnPositions[0]
             
             enemy2.physicsBody = SKPhysicsBody(texture: enemy2.texture!, size: enemy2.size)
             enemy2.physicsBody?.isDynamic = true
             enemy2.physicsBody?.categoryBitMask = self.enemyCategory
             enemy2.physicsBody?.contactTestBitMask = self.laserCategory
-            enemy2.physicsBody?.collisionBitMask = wallCategory
-
-            //let randomEnemyPositionX = GKRandomDistribution(lowestValue: Int(self.frame.minX), highestValue: Int(self.frame.maxX))
-            //let randomEnemyPositionY = GKRandomDistribution(lowestValue: Int(self.frame.minY), highestValue: Int(self.frame.maxY))
-            //let positionX = CGFloat(randomEnemyPositionX.nextInt())
-           // let positionY = CGFloat(randomEnemyPositionY.nextInt())
-            
-
+                enemy2.physicsBody?.collisionBitMask = self.wallCategory
             
             self.addChild(enemy2)
 
-            
-            let impulseVector = calcVector(firstLocation: enemy2.position, secondLocation: CGPoint(x: player.position.x, y: player.position.y))
+                let impulseVector = self.calcVector(firstLocation: enemy2.position, secondLocation: CGPoint(x: self.player.position.x, y: self.player.position.y))
             enemy2.zRotation = impulseVector.theAngle
 
             enemy2.physicsBody?.applyImpulse(impulseVector.theVector)
             
-            animateSub(enemy2: enemy2, impulseVector: impulseVector.theVector)
+                self.animateSub(enemy2: enemy2, impulseVector: impulseVector.theVector)
+            } else {
+                
+                self.possibleEnemies = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: self.possibleEnemies) as! [String]
+                
+                let enemy = SKSpriteNode(imageNamed: self.possibleEnemies[0])
+                enemy.setScale(2)
             
+                self.enemySpawnPositions = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: self.enemySpawnPositions) as! [CGPoint]
+                    enemy.position = self.enemySpawnPositions[0]
             
+                enemy.physicsBody = SKPhysicsBody(texture: enemy.texture!, size: enemy.size)
+                enemy.physicsBody?.isDynamic = true
+                enemy.physicsBody?.categoryBitMask = self.enemyCategory
+                enemy.physicsBody?.contactTestBitMask = self.laserCategory
+                    enemy.physicsBody?.collisionBitMask = self.wallCategory
+                
+                self.addChild(enemy)
             
-        }
-        else{
-//        enemyQueue.async {
-            self.possibleEnemies = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: self.possibleEnemies) as! [String]
+                // Used to pick a random location for the enemies to float towards
+                let randomEnemyPositionX = GKRandomDistribution(lowestValue: Int(self.frame.minX), highestValue: Int(self.frame.maxX))
+                let randomEnemyPositionY = GKRandomDistribution(lowestValue: Int(self.frame.minY), highestValue: Int(self.frame.maxY))
+                let positionX = CGFloat(randomEnemyPositionX.nextInt())
+                let positionY = CGFloat(randomEnemyPositionY.nextInt())
+                    let impulseVector = self.calcVector(firstLocation: enemy.position, secondLocation: CGPoint(x: positionX, y: positionY))
             
-            let enemy = SKSpriteNode(imageNamed: self.possibleEnemies[0])
-            enemy.setScale(2)
-        
-            self.enemySpawnPositions = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: self.enemySpawnPositions) as! [CGPoint]
-            enemy.position = enemySpawnPositions[0]
-        
-            enemy.physicsBody = SKPhysicsBody(texture: enemy.texture!, size: enemy.size)
-            enemy.physicsBody?.isDynamic = true
-            enemy.physicsBody?.categoryBitMask = self.enemyCategory
-            enemy.physicsBody?.contactTestBitMask = self.laserCategory
-            enemy.physicsBody?.collisionBitMask = wallCategory
-            
-            self.addChild(enemy)
-        
-            // Used to pick a random location for the enemies to float towards
-            let randomEnemyPositionX = GKRandomDistribution(lowestValue: Int(self.frame.minX), highestValue: Int(self.frame.maxX))
-            let randomEnemyPositionY = GKRandomDistribution(lowestValue: Int(self.frame.minY), highestValue: Int(self.frame.maxY))
-            let positionX = CGFloat(randomEnemyPositionX.nextInt())
-            let positionY = CGFloat(randomEnemyPositionY.nextInt())
-            let impulseVector = calcVector(firstLocation: enemy.position, secondLocation: CGPoint(x: positionX, y: positionY))
-        
-            enemy.physicsBody?.applyImpulse(impulseVector.theVector)
-            
-            
-            animateTrash(enemy: enemy)
-            
-        }
+                enemy.physicsBody?.applyImpulse(impulseVector.theVector)
+                
+                
+                    self.animateTrash(enemy: enemy)
+                
+            }
 
-//        }
+        }
         
     }
-    
-    
     
     // Runs when contact is detected
     func didBegin(_ contact: SKPhysicsContact) {
@@ -353,18 +339,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     func explodeAt  (laserNode: SKSpriteNode, position: CGPoint){
         if  (!gameOver){
-        let explosion = SKSpriteNode(fileNamed: "Explosion")!
-        explosion.setScale(CGFloat(0.5))
-        explosion.position = position
-        self.addChild(explosion)
+            let explosion = SKSpriteNode(fileNamed: "Explosion")!
+            explosion.setScale(CGFloat(0.5))
+            explosion.position = position
+            self.addChild(explosion)
 
-        //self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
-        
-        laserNode.removeFromParent()
-        
-        self.run(SKAction.wait(forDuration: 2)) {
-            explosion.removeFromParent()
-        }
+            //self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
+            
+            laserNode.removeFromParent()
+            
+            self.run(SKAction.wait(forDuration: 2)) {
+                explosion.removeFromParent()
+            }
         }
     }
     
@@ -405,6 +391,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
                 explosion.removeFromParent()
                 let transition = SKTransition.flipHorizontal(withDuration: 0.5)
                 let gameOverScene = GameOverScene(size: self.size)
+                gameOverScene.user = self.user
                 gameOverScene.score = self.score
                 self.view?.presentScene(gameOverScene, transition: transition)
             }
@@ -458,12 +445,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // builds textures for shark animation
     func buildShark() {
-        let sharkAnimatedAtlas = SKTextureAtlas(named: "laserSharkImages")
+        let sharkAnimatedAtlas = SKTextureAtlas(named: user.selectedPlayer+"Images")
         var swimFrames: [SKTexture] = []
         
         let numImages = sharkAnimatedAtlas.textureNames.count
         for i in 1...numImages {
-            let sharkTextureName = "laserShark\(i)"
+            let sharkTextureName = user.selectedPlayer+"\(i)"
             swimFrames.append(sharkAnimatedAtlas.textureNamed(sharkTextureName))
         }
         sharkSwimmingFrames = swimFrames
@@ -526,12 +513,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // starts sub animation
     func animateSub(enemy2: SKSpriteNode, impulseVector: CGVector) {
-        enemy2.run(SKAction.repeatForever(
-            SKAction.animate(with: subMovingFrames,
-                             timePerFrame: 0.15,
-                             resize: false,
-                             restore: true)),
-                   withKey:"movingInPlaceSub")
+//        enemy2.run(SKAction.repeatForever(
+//            SKAction.animate(with: subMovingFrames,
+//                             timePerFrame: 0.15,
+//                             resize: false,
+//                             restore: true)),
+//                   withKey:"movingInPlaceSub")
         
         
         var actionArray = [SKAction]()
