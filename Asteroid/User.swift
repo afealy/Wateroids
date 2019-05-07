@@ -13,36 +13,75 @@ class User: Codable {
     var username: String!
     var coins: Int!
     var scores: [Score]
-    var selectedPlayer: String!
+    var playerSkins: [PlayerNode]
+    var selectedPlayer: Int!
     
     init(username: String) {
         self.username = username
         coins = 0
         scores = []
+        playerSkins = [PlayerNode(name: "laserShark", cost: 0, purchased: true), PlayerNode(name: "blackLaserShark", cost: 20, purchased: false)]
     }
     
     func userDefaultGets() {
         self.username = UserDefaults.standard.string(forKey: "username")
         self.coins = UserDefaults.standard.integer(forKey: "coins")
         if let data = UserDefaults.standard.value(forKey: "scores") as? Data {
-            scores = try! PropertyListDecoder().decode([Score].self, from: data)
+            self.scores = try! PropertyListDecoder().decode([Score].self, from: data)
         } else {
-            scores = []
+            self.scores = []
+        }
+        if let data = UserDefaults.standard.value(forKey: "skins") as? Data {
+            self.playerSkins = try! PropertyListDecoder().decode([PlayerNode].self, from: data)
+        } else {
+            self.playerSkins = []
         }
     }
     
     func userDefaultSaves() {
         UserDefaults.standard.set(self.username, forKey: "username")
         UserDefaults.standard.set(self.coins, forKey: "coins")
+        UserDefaults.standard.set(try? PropertyListEncoder().encode(self.playerSkins), forKey: "skins")
     }
     
     func saveScore(_ value: Int) {
         highScoreCache.save(value)
+        self.userDefaultGets()
     }
     
-    func databaseCalls() {
-        
+    func unlockPlayer(name: String) -> Bool{
+        for i in 0..<self.playerSkins.count {
+            if self.playerSkins[i].name == name && self.coins >= self.playerSkins[i].cost {
+                self.coins -= self.playerSkins[i].cost
+                self.playerSkins[i].purchased = true
+                self.userDefaultSaves()
+                return true
+            }
+        }
+        return false
     }
+    
+    func clearUser() {
+        UserDefaults.standard.set(self.username, forKey: "username")
+        UserDefaults.standard.set(0, forKey: "coins")
+        UserDefaults.standard.set(try? PropertyListEncoder().encode([PlayerNode(name: "laserShark", cost: 0, purchased: true), PlayerNode(name: "blackLaserShark", cost: 20, purchased: false)]), forKey: "skins")
+        self.userDefaultGets()
+    }
+    
+}
+
+struct PlayerNode: Codable {
+    
+    var name: String!
+    var cost: Int!
+    var purchased: Bool!
+    
+    init(name: String, cost: Int, purchased: Bool) {
+        self.name = name
+        self.cost = cost
+        self.purchased = purchased
+    }
+    
 }
 
 struct Score: Codable {

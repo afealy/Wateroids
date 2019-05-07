@@ -445,12 +445,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     // builds textures for shark animation
     func buildShark() {
-        let sharkAnimatedAtlas = SKTextureAtlas(named: user.selectedPlayer+"Images")
+        let sharkAnimatedAtlas = SKTextureAtlas(named: user.playerSkins[user.selectedPlayer].name+"Images")
         var swimFrames: [SKTexture] = []
         
         let numImages = sharkAnimatedAtlas.textureNames.count
         for i in 1...numImages {
-            let sharkTextureName = user.selectedPlayer+"\(i)"
+            let sharkTextureName = user.playerSkins[user.selectedPlayer].name+"\(i)"
             swimFrames.append(sharkAnimatedAtlas.textureNamed(sharkTextureName))
         }
         sharkSwimmingFrames = swimFrames

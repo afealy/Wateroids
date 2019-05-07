@@ -28,8 +28,13 @@ class GameOverScene: SKScene {
         
         self.backgroundColor = BackgroundColor
         
-        var myCoins = user.coins!
         user.saveScore(score)
+        
+        var myCoins = user.coins!
+        coins = score/10
+        myCoins += coins
+        user.coins = myCoins
+        user.userDefaultSaves()
         
         // Set up game title label
         titleLabel = SKLabelNode(text: "Game Over!")
@@ -47,11 +52,6 @@ class GameOverScene: SKScene {
         scoreLabel.fontColor = .white
         
         self.addChild(scoreLabel)
-        
-        coins = Int(score/10)
-        myCoins += coins
-        user.coins = myCoins
-        user.userDefaultSaves()
         
         coinLabel = SKLabelNode(text: "Coins Earned: \(coins)")
         coinLabel.position = CGPoint(x: self.frame.size.width/2, y: self.frame.size.height-250)

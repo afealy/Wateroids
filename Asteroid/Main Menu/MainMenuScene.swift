@@ -23,6 +23,8 @@ class MainMenuScene: SKScene {
     var selectedPlayer = 0
     var playerPicker: [SKSpriteNode]!
     var selectionBorder: SKSpriteNode!
+    var buyButton: SKSpriteNode!
+    var priceLabel: SKLabelNode!
     
 //    var docRef: DocumentReference!
 //    var username: String?
@@ -31,10 +33,6 @@ class MainMenuScene: SKScene {
     override func didMove(to view: SKView) {
         
         self.backgroundColor = BackgroundColor
-        
-//        username = "Not loading"
-//        coins = 0
-//        databaseCalls()
         
         // Set up game title label
         titleLabel = SKLabelNode(text: "Wateroids")
@@ -84,6 +82,7 @@ class MainMenuScene: SKScene {
             self.addChild(player)
         }
         
+        user.selectedPlayer = selectedPlayer
         selectionBorder = SKSpriteNode(imageNamed: "selectionBorder")
         selectionBorder.position = playerPicker[0].position
         selectionBorder.setScale(2.0)
@@ -115,7 +114,6 @@ class MainMenuScene: SKScene {
             
             if let firstNode = nodesArray.first {
                 if firstNode == newGameButton {
-                    user.selectedPlayer = playerPicker[selectedPlayer].name
                     newGameButton.texture = SKTexture(imageNamed: "newGameButton_clicked")
                 } else if firstNode == highScoresButton {
                     highScoresButton.texture = SKTexture(imageNamed: "highScoresButton_clicked")
@@ -123,16 +121,36 @@ class MainMenuScene: SKScene {
                     changedSelected(index: 0)
                 } else if firstNode == playerPicker[1] {
                     changedSelected(index: 1)
+                } else if firstNode == buyButton {
+                    buyButton.texture = SKTexture(imageNamed: "buyButton_clicked")
                 }
             }
         }
     }
     
     func changedSelected(index: Int) {
-//        print(playerPicker[selectedPlayer].name)
         if index != selectedPlayer {
             selectedPlayer = index
             selectionBorder.position = playerPicker[index].position
+            if !user.playerSkins[selectedPlayer].purchased {
+                buyButton = SKSpriteNode(imageNamed: "buyButton_unclicked")
+                buyButton.name = "buyButton"
+                buyButton.position = CGPoint(x: 0, y: playerPicker[selectedPlayer].position.y-(buyButton.frame.height + 50))
+                self.addChild(buyButton)
+                
+                priceLabel = SKLabelNode(text: "Cost: " + user.playerSkins[selectedPlayer].cost.description)
+                priceLabel.position = CGPoint(x: playerPicker[selectedPlayer].position.x, y: playerPicker[selectedPlayer].position.y+50)
+                priceLabel.fontName = "AmericanTypewriter-Bold"
+                priceLabel.fontSize = 20
+                priceLabel.fontColor = .white
+                self.addChild(priceLabel)
+            } else {
+                if let _ = self.childNode(withName: "buyButton") {
+                    buyButton.removeFromParent()
+                    priceLabel.removeFromParent()
+                }
+                user.selectedPlayer = selectedPlayer
+            }
         }
     }
     
@@ -159,6 +177,14 @@ class MainMenuScene: SKScene {
                     highScoresScene.user = user
                     self.run(SKAction.wait(forDuration: 0.3)) {
                         self.view?.presentScene(highScoresScene, transition: transition)
+                    }
+                } else if firstNode == buyButton {
+                    buyButton.texture = SKTexture(imageNamed: "buyButton_unclicked")
+                    if user.unlockPlayer(name: playerPicker[selectedPlayer].name!) {
+                        buyButton.removeFromParent()
+                        priceLabel.removeFromParent()
+                        user.selectedPlayer = selectedPlayer
+                        coinsLabel.text = "Coins: " + user.coins.description
                     }
                 }
             }
@@ -188,6 +214,14 @@ class MainMenuScene: SKScene {
                     highScoresScene.user = user
                     self.run(SKAction.wait(forDuration: 0.3)) {
                         self.view?.presentScene(highScoresScene, transition: transition)
+                    }
+                } else if firstNode == buyButton {
+                    highScoresButton.texture = SKTexture(imageNamed: "buyButton_unclicked")
+                    if user.unlockPlayer(name: playerPicker[selectedPlayer].name!) {
+                        buyButton.removeFromParent()
+                        priceLabel.removeFromParent()
+                        user.selectedPlayer = selectedPlayer
+                        coinsLabel.text = "Coins: " + user.coins.description
                     }
                 }
             }
