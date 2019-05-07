@@ -10,12 +10,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Asteroid/Game/GameScene.swift"
-            timestampString = "578796710.064656"
+            timestampString = "578953267.435141"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "346"
-            endingLineNumber = "346"
-            landmarkName = "didBegin(_:)"
+            startingLineNumber = "364"
+            endingLineNumber = "364"
+            landmarkName = "explodeAt(laserNode:position:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -26,12 +26,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Asteroid/Game/GameScene.swift"
-            timestampString = "578796710.065164"
+            timestampString = "578953267.435652"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "349"
-            endingLineNumber = "349"
-            landmarkName = "didBegin(_:)"
+            startingLineNumber = "366"
+            endingLineNumber = "366"
+            landmarkName = "explodeAt(laserNode:position:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -42,12 +42,12 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Asteroid/Game/GameScene.swift"
-            timestampString = "578796710.065527"
+            timestampString = "578953267.436012"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "342"
-            endingLineNumber = "342"
-            landmarkName = "didBegin(_:)"
+            startingLineNumber = "535"
+            endingLineNumber = "535"
+            landmarkName = "animateSub(enemy2:impulseVector:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -58,43 +58,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Asteroid/Game/GameScene.swift"
-            timestampString = "578796710.065886"
+            timestampString = "578953267.436368"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "341"
-            endingLineNumber = "341"
-            landmarkName = "didBegin(_:)"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Asteroid/Game/GameScene.swift"
-            timestampString = "578796710.066242"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "516"
-            endingLineNumber = "516"
-            landmarkName = "buildSub()"
-            landmarkType = "7">
-         </BreakpointContent>
-      </BreakpointProxy>
-      <BreakpointProxy
-         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
-         <BreakpointContent
-            shouldBeEnabled = "No"
-            ignoreCount = "0"
-            continueAfterRunningActions = "No"
-            filePath = "Asteroid/Game/GameScene.swift"
-            timestampString = "578796710.066601"
-            startingColumnNumber = "9223372036854775807"
-            endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "540"
-            endingLineNumber = "540"
+            startingLineNumber = "553"
+            endingLineNumber = "553"
             landmarkName = "animateSub(enemy2:impulseVector:)"
             landmarkType = "7">
             <Locations>
@@ -138,12 +106,42 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Asteroid/Game/GameScene.swift"
-            timestampString = "578796710.066923"
+            timestampString = "578953267.436726"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "551"
-            endingLineNumber = "551"
-            landmarkName = "animateSub(enemy2:impulseVector:)"
+            startingLineNumber = "557"
+            endingLineNumber = "557">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Asteroid/Game/GameScene.swift"
+            timestampString = "578953267.437043"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "100"
+            endingLineNumber = "100"
+            landmarkName = "didMove(to:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Asteroid/Game/GameScene.swift"
+            timestampString = "578953267.437429"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "73"
+            endingLineNumber = "73"
+            landmarkName = "animatebg1(background:isB1:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

@@ -11,7 +11,7 @@ import GameplayKit
 
 class GameScene: SKScene, SKPhysicsContactDelegate {
     
-    let BackgroundColor: UIColor = UIColor(red: 51.0/255.0, green: 86.0/255.0, blue: 137.0/255.0, alpha: 1.0)
+    //let BackgroundColor: UIColor = UIColor(red: 51.0/255.0, green: 86.0/255.0, blue: 137.0/255.0, alpha: 1.0)
    // var background = SKSpriteNode()
     
     var user: User!
@@ -20,7 +20,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var gameOver = false
     var sharkSwimmingFrames: [SKTexture] = []
     var subMovingFrames: [SKTexture] = []
-    var subBossScore = 0 //Score at which subs can appear
+    let subBossScore = 0 //Score at which subs can appear
 
     var laserFiringFrames: [SKTexture] = []
     
@@ -46,33 +46,53 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
   
     func createWater(){
         //self.backgroundColor = BackgroundColor
-        let background = SKSpriteNode(imageNamed: "water")
-        let background2 = SKSpriteNode(imageNamed: "water")
+        let backgroundTexture = SKTexture(imageNamed: "water")
+        let background1 = SKSpriteNode(texture: backgroundTexture)
+        let background2 = SKSpriteNode(texture: backgroundTexture)
+        
+        background1.position = CGPoint(x: 0, y: 0)
+        background1.size = self.size
+        background1.zPosition = -40
 
-        
-        background.position = CGPoint(x: 0, y: 0)
-        background.size = self.size
-        background2.position = CGPoint(x: background.size.width, y: 0)
+        background2.position = CGPoint(x: background1.size.width, y: 0)
         background2.size = self.size
-        addChild(background)
-        background2.xScale = -1
-        //background2.yScale = -1
-        addChild(background2)
-        background.zPosition = -40
         background2.zPosition = -40
+        background2.xScale = -1
+
+        addChild(background1)
+        addChild(background2)
         
-        animatebg(background: background)
-        animatebg(background: background2)
+        
+        animatebg1(background: background1, isB1: true)
+        animatebg2(background: background2, isB1: false)
     }
     
-    func animatebg(background: SKSpriteNode){
-        let moveLeft = SKAction.moveBy(x: -background.size.width, y: 0, duration: 100) //change duration to v long after completion
-        let reset = SKAction.moveBy(x: background.size.width, y: 0, duration: 100)
+    func animatebg1(background: SKSpriteNode, isB1: Bool){
+        let width = background.size.width
         
-        let moveLoop = SKAction.sequence([moveLeft, reset])
+        let moveLeftInitial = SKAction.moveTo(x: -width, duration: 100)
+        
+        let reset = SKAction.moveTo(x: width, duration: 0)
+        let moveLeft = SKAction.moveTo(x: -width, duration: 200)
+        
+        let moveLoop = SKAction.sequence([reset,moveLeft])
+        let moveForever = SKAction.repeatForever(moveLoop)
+        let seq = SKAction.sequence([moveLeftInitial,moveForever])
+        
+        background.run(seq)
+    }
+    
+    func animatebg2(background: SKSpriteNode, isB1: Bool){
+        let width = background.size.width
+
+        let reset = SKAction.moveTo(x: width, duration: 0)
+        let moveLeft = SKAction.moveTo(x: -width, duration: 200)
+        
+        let moveLoop = SKAction.sequence([moveLeft,reset])
         let moveForever = SKAction.repeatForever(moveLoop)
         
         background.run(moveForever)
+
     }
     
     override func didMove(to view: SKView) {
@@ -89,7 +109,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let frameWithPadding: CGRect = CGRect(x: self.frame.minX - padding, y: self.frame.minY - padding, width: self.frame.width + (padding * 2), height: self.frame.height + (padding * 2))
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: frameWithPadding)
         self.physicsBody?.categoryBitMask = wallCategory
-        self.physicsBody?.friction = 1
+       // self.physicsBody?.friction = 1
         
         // Sets up animation textures
         buildShark()
@@ -242,7 +262,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         actionArray.append(SKAction.run {
             self.explodeAt(laserNode: torp, position: torp.position)
         })
-        
         torp.run(SKAction.sequence(actionArray))
 
     }
@@ -338,20 +357,18 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     
     func explodeAt  (laserNode: SKSpriteNode, position: CGPoint){
-        if  (!gameOver){
             let explosion = SKSpriteNode(fileNamed: "Explosion")!
             explosion.setScale(CGFloat(0.5))
             explosion.position = position
             self.addChild(explosion)
 
             //self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
-            
             laserNode.removeFromParent()
-            
+        
             self.run(SKAction.wait(forDuration: 2)) {
                 explosion.removeFromParent()
             }
-        }
+        
     }
     
     // Handles enemy and player explosions
@@ -421,7 +438,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         player.position = CGPoint(x: 0, y: 0)
         player.physicsBody = SKPhysicsBody(texture: player.texture!, size: player.size)
         player.physicsBody?.affectedByGravity = false
-        player.physicsBody?.friction = 1
+        //player.physicsBody?.friction = 1
         
         player.physicsBody?.collisionBitMask = wallCategory
         player.physicsBody?.categoryBitMask = laserCategory
@@ -508,27 +525,23 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             let subTextureName = "sub\(i)"
             moveFrames.append(subAnimatedAtlas.textureNamed(subTextureName))
         }
+        moveFrames.append(contentsOf: moveFrames.reversed())
+        
         subMovingFrames = moveFrames
     }
     
     // starts sub animation
     func animateSub(enemy2: SKSpriteNode, impulseVector: CGVector) {
-//        enemy2.run(SKAction.repeatForever(
-//            SKAction.animate(with: subMovingFrames,
-//                             timePerFrame: 0.15,
-//                             resize: false,
-//                             restore: true)),
-//                   withKey:"movingInPlaceSub")
+        enemy2.run(SKAction.repeatForever(
+            SKAction.animate(with: subMovingFrames,
+                             timePerFrame: 0.15,
+                             resize: false,
+                             restore: true)),
+                   withKey:"movingInPlaceSub")
         
         
         var actionArray = [SKAction]()
         actionArray.append(SKAction.wait(forDuration: 1 ))
-        
-        /*actionArray.append(SKAction.run{
-            let impulseVector = self.calcVector(firstLocation: enemy2.position, secondLocation: CGPoint(x: self.player.position.x, y: self.player.position.y))
-            let r = impulseVector.theAngle
-            SKAction.rotate(byAngle: r, duration: 1)
-            })*/ //failed attempt to rotate missile before firing
        
         actionArray.append(SKAction.run {
             self.fireTorpedoAtPlayer(enemy2: enemy2, impulseVector: impulseVector)
