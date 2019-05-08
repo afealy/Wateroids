@@ -423,8 +423,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             }
             }
                 
-            else {
-                explodeEnemy(laserNode: laserNode, enemyNode: enemyNode)
+            else { //trashbag enemy type
+                self.explodeEnemy(laserNode: laserNode, enemyNode: enemyNode)
             }
             
         } else { // enemy collides with ship
@@ -519,12 +519,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     }
     func animateTrash(enemy: SKSpriteNode){
         var actionArray = [SKAction]()
-        actionArray.append(SKAction.wait(forDuration: 10))
+        actionArray.append(SKAction.wait(forDuration: 1.5))
+        actionArray.append(SKAction.colorize(with: UIColor.green, colorBlendFactor: 0.9, duration: 3.7))
+        actionArray.append(SKAction.run {
+            enemy.physicsBody = nil
+        })
+
         actionArray.append(SKAction.fadeOut(withDuration: 0.25))
         actionArray.append(SKAction.run {
             enemy.removeFromParent()
-            self.score -= 3 // remove for trash littered
         })
+        enemy.run(SKAction.sequence(actionArray))
     }
     
     // builds textures for laser animation
