@@ -20,6 +20,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var gameOver = false
     var sharkSwimmingFrames: [SKTexture] = []
     var subMovingFrames: [SKTexture] = []
+    var subDyingFrames: [SKTexture] = []
     let subBossScore = 0 //Score at which subs can appear
 
     var laserFiringFrames: [SKTexture] = []
@@ -297,7 +298,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
             enemy2.physicsBody?.isDynamic = true
             enemy2.physicsBody?.categoryBitMask = self.enemyCategory
             enemy2.physicsBody?.contactTestBitMask = self.laserCategory
-                enemy2.physicsBody?.collisionBitMask = self.wallCategory
+            enemy2.physicsBody?.collisionBitMask = self.wallCategory
+            enemy2.name = "sub"
             
             self.addChild(enemy2)
 
@@ -381,27 +383,50 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
     }
     
+    func explodeEnemy(laserNode: SKSpriteNode, enemyNode: SKSpriteNode){
+        let explosion = SKSpriteNode(fileNamed: "Explosion")!
+
+        explosion.position = enemyNode.position
+        self.addChild(explosion)
+        
+        // Explosion sound
+        //self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
+        
+        laserNode.removeFromParent()
+        enemyNode.removeFromParent()
+        
+        self.run(SKAction.wait(forDuration: 2)) {
+            explosion.removeFromParent()
+        }
+        
+        score += 5
+    }
+    
     // Handles enemy and player explosions
     func laserDidHitEnemy (laserNode: SKSpriteNode, enemyNode: SKSpriteNode) {
-        
         let explosion = SKSpriteNode(fileNamed: "Explosion")!
+        enemyNode.physicsBody = nil // fixes framerate error
         
         // laser shoots enemy
         if laserNode != player {
-            explosion.position = enemyNode.position
-            self.addChild(explosion)
+            if  (enemyNode.name == "sub") {
+                enemyNode.removeAllActions()
+                enemyNode.run(
+                    SKAction.animate(with: self.subDyingFrames,
+                                     timePerFrame: 0.2,
+                                     resize: false,
+                                     restore: true),
+                           withKey:"dyingInPlaceSub")
             
-            // Explosion sound
-            //self.run(SKAction.playSoundFileNamed("explosion.mp3", waitForCompletion: false))
-            
-            laserNode.removeFromParent()
-            enemyNode.removeFromParent()
-            
-            self.run(SKAction.wait(forDuration: 2)) {
-                explosion.removeFromParent()
+            self.run(SKAction.wait(forDuration: 0.4)) {
+                self.explodeEnemy(laserNode: laserNode, enemyNode: enemyNode)
+            }
+            }
+                
+            else {
+                explodeEnemy(laserNode: laserNode, enemyNode: enemyNode)
             }
             
-            score += 5
         } else { // enemy collides with ship
             explosion.position = laserNode.position
             self.addChild(explosion)
@@ -530,14 +555,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         let subAnimatedAtlas = SKTextureAtlas(named: "subImages")
         var moveFrames: [SKTexture] = []
         
+        var dyingFrames: [SKTexture] = []
+
+        
         let numImages = subAnimatedAtlas.textureNames.count
         for i in 1...numImages {
             let subTextureName = "sub\(i)"
-            moveFrames.append(subAnimatedAtlas.textureNamed(subTextureName))
+            if(i<4){
+                moveFrames.append(subAnimatedAtlas.textureNamed(subTextureName))
+            }
+            else{
+                dyingFrames.append(subAnimatedAtlas.textureNamed(subTextureName)) //death frames
+            }
         }
         moveFrames.append(contentsOf: moveFrames.reversed())
         
         subMovingFrames = moveFrames
+        subDyingFrames = dyingFrames
+
     }
     
     // starts sub animation
