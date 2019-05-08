@@ -212,7 +212,17 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         
         // ! find way to make laser fire from front of ship !
         
-        laserNode.physicsBody = SKPhysicsBody(texture: laserNode.texture!, size: laserNode.size)
+        //Black shark fires better laser
+        if (user.playerSkins[user.selectedPlayer].name == "blackLaserShark"){
+            laserNode.xScale *= 1.5
+            laserNode.yScale *= 3
+            laserNode.physicsBody = SKPhysicsBody(texture: laserNode.texture!, size: CGSize(width: laserNode.size.width*1.5, height: laserNode.size.height*3))
+        }
+        else{
+            laserNode.physicsBody = SKPhysicsBody(texture: laserNode.texture!, size: laserNode.size)
+
+        }
+        
         laserNode.physicsBody?.isDynamic = true
         laserNode.physicsBody?.categoryBitMask = laserCategory
         laserNode.physicsBody?.contactTestBitMask = enemyCategory
