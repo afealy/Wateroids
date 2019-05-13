@@ -12,13 +12,15 @@ import GameplayKit
 
 class GameViewController: UIViewController {
     
+    var singleTap : UITapGestureRecognizer!
+    var longPress : UILongPressGestureRecognizer!
+    
     override func viewDidLoad() {
         super.viewDidLoad()
 //        UserDefaults.standard.removeObject(forKey: "documentid")
 //        print(UserDefaults.standard.string(forKey: "documentid") ?? "No Document ID found!")
 //        if let docID = UserDefaults.standard.string(forKey: "documentid") {
         if let username = UserDefaults.standard.string(forKey: "username") {
-            
             let user = User(username: username)
             user.userDefaultGets()
             

@@ -34,16 +34,16 @@ class User: Codable {
         if let data = UserDefaults.standard.value(forKey: "skins") as? Data {
             self.playerSkins = try! PropertyListDecoder().decode([PlayerNode].self, from: data)
         } else {
-            self.playerSkins = []
+            
         }
     }
     
     func userDefaultSaves() {
         UserDefaults.standard.set(self.username, forKey: "username")
         UserDefaults.standard.set(self.coins, forKey: "coins")
-        UserDefaults.standard.set(try? PropertyListEncoder().encode(self.playerSkins), forKey: "skins")
+        UserDefaults.standard.set(self.playerSkins, forKey: "skins")
     }
-    
+    //try? PropertyListEncoder().encode(self.playerSkins)
     func saveScore(_ value: Int) {
         highScoreCache.save(value)
         self.userDefaultGets()

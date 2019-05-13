@@ -8,8 +8,8 @@
 
 import SpriteKit
 import GameplayKit
-
-class GameScene: SKScene, SKPhysicsContactDelegate {
+import UIKit
+class GameScene: SKScene, SKPhysicsContactDelegate, UIGestureRecognizerDelegate {
     
     //let BackgroundColor: UIColor = UIColor(red: 51.0/255.0, green: 86.0/255.0, blue: 137.0/255.0, alpha: 1.0)
    // var background = SKSpriteNode()
@@ -22,7 +22,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     var subMovingFrames: [SKTexture] = []
     var subDyingFrames: [SKTexture] = []
     let subBossScore = 0 //Score at which subs can appear
-
+    @objc var singleTap : UITapGestureRecognizer!
+    @objc var longPress : UILongPressGestureRecognizer!
     var laserFiringFrames: [SKTexture] = []
     
     var scoreLabel: SKLabelNode!
@@ -96,6 +97,45 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
 
     }
     
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldRequireFailureOf otherGestureRecognizer: UIGestureRecognizer) -> Bool {
+        print(gestureRecognizer)
+        print("HELLO")
+        print(otherGestureRecognizer)
+        return (gestureRecognizer == singleTap) && (otherGestureRecognizer == longPress)
+        
+    }
+
+    
+    
+//    let tapLocation = touch.location(in: self)
+//    let playerLocation = player.position
+//
+//    //            print("tap: \(tapLocation)")
+//    //            print("player: \(playerLocation)")
+//
+//    let posVariables = calcVector(firstLocation: playerLocation, secondLocation: tapLocation)
+//    player.zRotation = posVariables.theAngle
+//
+//    player.physicsBody?.applyImpulse(posVariables.theVector)
+//    fireLaser(tapLocation: tapLocation)
+    
+    
+    @objc func singleTap(recog: UITapGestureRecognizer){
+        let loc = recog.location(in: view)
+        fireLaser(tapLocation: loc)
+    }
+    
+    @objc func longPress(recog: UIGestureRecognizer){
+        if(recog.state == UIGestureRecognizer.State.began || recog.state == UIGestureRecognizer.State.changed){
+            let loc = recog.location(in: view)
+            let playerLocation = player.position
+            let posVariables = calcVector(firstLocation: playerLocation, secondLocation: loc)
+            player.zRotation = posVariables.theAngle
+            player.physicsBody?.applyImpulse(posVariables.theVector)
+        }
+    }
+    
+    
     override func didMove(to view: SKView) {
         
        createWater()
@@ -104,6 +144,8 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.physicsWorld.gravity = CGVector(dx: 0, dy: 0)
         self.physicsWorld.contactDelegate = self
         
+        // Set touch gestures
+        
         //self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame) //removed since it ibhibits wraparound,
         //updated to unique CGRect w/ padding
         let padding = CGFloat(67)
@@ -111,6 +153,24 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         self.physicsBody = SKPhysicsBody(edgeLoopFrom: frameWithPadding)
         self.physicsBody?.categoryBitMask = wallCategory
        // self.physicsBody?.friction = 1
+        
+//        if let username = UserDefaults.standard.string(forKey: "username") {
+//            let user = User(username: username)
+//            user.userDefaultGets()
+//        }
+//
+        self.singleTap = UITapGestureRecognizer(target: self, action: #selector(getter: self.singleTap))
+        self.singleTap.numberOfTapsRequired = 1
+        self.singleTap.numberOfTouchesRequired = 1
+        self.view?.addGestureRecognizer(self.singleTap)
+        self.singleTap.delegate = self
+        
+        self.longPress = UILongPressGestureRecognizer(target: self, action: #selector(getter: self.longPress))
+        self.longPress.minimumPressDuration = 0.5
+        self.longPress.numberOfTapsRequired = 1
+        self.longPress.numberOfTouchesRequired = 1
+        self.longPress.allowableMovement = 50
+        self.view?.addGestureRecognizer(self.longPress)
         
         // Sets up animation textures
         buildShark()
@@ -121,6 +181,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
         loadGame()
         
     }
+    
     
     override func update(_ currentTime: TimeInterval) {
         infinityWrapUpdater(player)
@@ -147,21 +208,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate {
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         if (!gameOver){ //prevents shooting at time of death
-            if let touch = touches.reversed().first {
-                
-                // get tap and ship locations in the scene
-                let tapLocation = touch.location(in: self)
-                let playerLocation = player.position
-                
-    //            print("tap: \(tapLocation)")
-    //            print("player: \(playerLocation)")
-
-                let posVariables = calcVector(firstLocation: playerLocation, secondLocation: tapLocation)
-                player.zRotation = posVariables.theAngle
-                
-                player.physicsBody?.applyImpulse(posVariables.theVector)
-                fireLaser(tapLocation: tapLocation)
-            }
+//            if let touch = touches.reversed().first {
+//
+//                // get tap and ship locations in the scene
+//                let tapLocation = touch.location(in: self)
+//                let playerLocation = player.position
+//
+//    //            print("tap: \(tapLocation)")
+//    //            print("player: \(playerLocation)")
+//
+//                let posVariables = calcVector(firstLocation: playerLocation, secondLocation: tapLocation)
+//                player.zRotation = posVariables.theAngle
+//
+//                player.physicsBody?.applyImpulse(posVariables.theVector)
+//                fireLaser(tapLocation: tapLocation)
+//            }
         }
     }
     
