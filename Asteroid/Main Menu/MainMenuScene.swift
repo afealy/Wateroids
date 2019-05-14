@@ -32,6 +32,7 @@ class MainMenuScene: SKScene {
     
     override func didMove(to view: SKView) {
         
+        print(user.playerSkins)
         self.backgroundColor = BackgroundColor
         
         // Set up game title label
@@ -70,12 +71,13 @@ class MainMenuScene: SKScene {
         
         self.addChild(highScoresButton)
         
-        playerPicker = [SKSpriteNode(imageNamed: "laserShark1"), SKSpriteNode(imageNamed: "blackLaserShark1")]
+        playerPicker = [SKSpriteNode(imageNamed: "laserShark1"), SKSpriteNode(imageNamed: "blackLaserShark1"), SKSpriteNode(imageNamed: "goldLaserShark1")]
         playerPicker[0].position = CGPoint(x: 0-(playerPicker[0].frame.width+40), y: 0-(highScoresButton.frame.height+120))
         playerPicker[0].name = "laserShark"
         playerPicker[1].position = CGPoint(x: 0, y: 0-(highScoresButton.frame.height+120))
         playerPicker[1].name = "blackLaserShark"
-//        playerPicker[2].position = CGPoint(x: playerPicker[0].frame.width+40, y: 0-(highScoresButton.frame.height+120))
+        playerPicker[2].position = CGPoint(x: playerPicker[0].frame.width+40, y: 0-(highScoresButton.frame.height+120))
+        playerPicker[2].name = "goldLaserShark"
         
         for player in playerPicker {
             player.setScale(2.0)
@@ -118,9 +120,23 @@ class MainMenuScene: SKScene {
                 } else if firstNode == highScoresButton {
                     highScoresButton.texture = SKTexture(imageNamed: "highScoresButton_clicked")
                 } else if firstNode == playerPicker[0] {
+                    if let _ = self.childNode(withName: "buyButton") {
+                        buyButton.removeFromParent()
+                        priceLabel.removeFromParent()
+                    }
                     changedSelected(index: 0)
                 } else if firstNode == playerPicker[1] {
+                    if let _ = self.childNode(withName: "buyButton") {
+                        buyButton.removeFromParent()
+                        priceLabel.removeFromParent()
+                    }
                     changedSelected(index: 1)
+                }else if firstNode == playerPicker[2] {
+                    if let _ = self.childNode(withName: "buyButton") {
+                        buyButton.removeFromParent()
+                        priceLabel.removeFromParent()
+                    }
+                    changedSelected(index: 2)
                 } else if firstNode == buyButton {
                     buyButton.texture = SKTexture(imageNamed: "buyButton_clicked")
                 }
@@ -145,10 +161,10 @@ class MainMenuScene: SKScene {
                 priceLabel.fontColor = .white
                 self.addChild(priceLabel)
             } else {
-                if let _ = self.childNode(withName: "buyButton") {
-                    buyButton.removeFromParent()
-                    priceLabel.removeFromParent()
-                }
+//                if let _ = self.childNode(withName: "buyButton") {
+//                    buyButton.removeFromParent()
+//                    priceLabel.removeFromParent()
+//                }
                 user.selectedPlayer = selectedPlayer
             }
         }

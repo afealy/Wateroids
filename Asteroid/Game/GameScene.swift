@@ -64,7 +64,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIGestureRecognizerDelegate 
         addChild(background1)
         addChild(background2)
         
-        
         animatebg1(background: background1)
         animatebg2(background: background2)
     }
@@ -350,25 +349,25 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIGestureRecognizerDelegate 
             if(self.score >= self.subBossScore && bossRandomizer){
             
                 let enemy2 = SKSpriteNode(texture: self.subMovingFrames[0])
-            enemy2.setScale(3.5)
-            
-            self.enemySpawnPositions = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: self.enemySpawnPositions) as! [CGPoint]
+                enemy2.setScale(3.5)
+                
+                self.enemySpawnPositions = GKRandomSource.sharedRandom().arrayByShufflingObjects(in: self.enemySpawnPositions) as! [CGPoint]
                 enemy2.position = self.enemySpawnPositions[0]
             
-            enemy2.physicsBody = SKPhysicsBody(texture: enemy2.texture!, size: enemy2.size)
-            enemy2.physicsBody?.isDynamic = true
-            enemy2.physicsBody?.categoryBitMask = self.enemyCategory
-            enemy2.physicsBody?.contactTestBitMask = self.laserCategory
-            enemy2.physicsBody?.collisionBitMask = self.wallCategory
-            enemy2.name = "sub"
-            
-            self.addChild(enemy2)
+                enemy2.physicsBody = SKPhysicsBody(texture: enemy2.texture!, size: enemy2.size)
+                enemy2.physicsBody?.isDynamic = true
+                enemy2.physicsBody?.categoryBitMask = self.enemyCategory
+                enemy2.physicsBody?.contactTestBitMask = self.laserCategory
+                enemy2.physicsBody?.collisionBitMask = self.wallCategory
+                enemy2.name = "sub"
+                
+                self.addChild(enemy2)
 
                 let impulseVector = self.calcVector(firstLocation: enemy2.position, secondLocation: CGPoint(x: self.player.position.x, y: self.player.position.y))
-            enemy2.zRotation = impulseVector.theAngle
+                enemy2.zRotation = impulseVector.theAngle
 
-            enemy2.physicsBody?.applyImpulse(impulseVector.theVector)
-            
+                enemy2.physicsBody?.applyImpulse(impulseVector.theVector)
+                
                 self.animateSub(enemy2: enemy2, impulseVector: impulseVector.theVector)
             } else {
                 
@@ -384,7 +383,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIGestureRecognizerDelegate 
                 enemy.physicsBody?.isDynamic = true
                 enemy.physicsBody?.categoryBitMask = self.enemyCategory
                 enemy.physicsBody?.contactTestBitMask = self.laserCategory
-                    enemy.physicsBody?.collisionBitMask = self.wallCategory
+                enemy.physicsBody?.collisionBitMask = self.wallCategory
                 
                 self.addChild(enemy)
             
@@ -393,12 +392,12 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIGestureRecognizerDelegate 
                 let randomEnemyPositionY = GKRandomDistribution(lowestValue: Int(self.frame.minY), highestValue: Int(self.frame.maxY))
                 let positionX = CGFloat(randomEnemyPositionX.nextInt())
                 let positionY = CGFloat(randomEnemyPositionY.nextInt())
-                    let impulseVector = self.calcVector(firstLocation: enemy.position, secondLocation: CGPoint(x: positionX, y: positionY))
+                let impulseVector = self.calcVector(firstLocation: enemy.position, secondLocation: CGPoint(x: positionX, y: positionY))
             
                 enemy.physicsBody?.applyImpulse(impulseVector.theVector)
                 
                 
-                    self.animateTrash(enemy: enemy)
+                self.animateTrash(enemy: enemy)
                 
             }
 

@@ -18,9 +18,10 @@ class User: Codable {
     
     init(username: String) {
         self.username = username
-        coins = 0
-        scores = []
-        playerSkins = [PlayerNode(name: "laserShark", cost: 0, purchased: true), PlayerNode(name: "blackLaserShark", cost: 20, purchased: false)]
+        self.coins = 0
+        self.scores = []
+        self.playerSkins = [PlayerNode(name: "laserShark", cost: 0, purchased: true), PlayerNode(name: "blackLaserShark", cost: 20, purchased: false), PlayerNode(name: "goldLaserShark", cost: 50, purchased: false)]
+        self.userDefaultSaves()
     }
     
     func userDefaultGets() {
@@ -41,7 +42,7 @@ class User: Codable {
     func userDefaultSaves() {
         UserDefaults.standard.set(self.username, forKey: "username")
         UserDefaults.standard.set(self.coins, forKey: "coins")
-        UserDefaults.standard.set(self.playerSkins, forKey: "skins")
+        UserDefaults.standard.set(try? PropertyListEncoder().encode(self.playerSkins), forKey: "skins")
     }
     //try? PropertyListEncoder().encode(self.playerSkins)
     func saveScore(_ value: Int) {
@@ -64,7 +65,7 @@ class User: Codable {
     func clearUser() {
         UserDefaults.standard.set(self.username, forKey: "username")
         UserDefaults.standard.set(0, forKey: "coins")
-        UserDefaults.standard.set(try? PropertyListEncoder().encode([PlayerNode(name: "laserShark", cost: 0, purchased: true), PlayerNode(name: "blackLaserShark", cost: 20, purchased: false)]), forKey: "skins")
+        UserDefaults.standard.set(try? PropertyListEncoder().encode([PlayerNode(name: "laserShark", cost: 0, purchased: true), PlayerNode(name: "blackLaserShark", cost: 20, purchased: false), PlayerNode(name: "goldLaserShark", cost: 50, purchased: false)]), forKey: "skins")
         self.userDefaultGets()
     }
     

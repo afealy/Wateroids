@@ -34,6 +34,7 @@ class GameOverScene: SKScene {
         coins = score/10
         myCoins += coins
         user.coins = myCoins
+        print("HEREREREFRNFGJISOBV")
         user.userDefaultSaves()
         
         // Set up game title label
