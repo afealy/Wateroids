@@ -21,7 +21,6 @@ class User: Codable {
         self.coins = 0
         self.scores = []
         self.playerSkins = [PlayerNode(name: "laserShark", cost: 0, purchased: true), PlayerNode(name: "blackLaserShark", cost: 20, purchased: false), PlayerNode(name: "goldLaserShark", cost: 50, purchased: false)]
-        self.userDefaultSaves()
     }
     
     func userDefaultGets() {

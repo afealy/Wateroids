@@ -121,6 +121,9 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIGestureRecognizerDelegate 
     
     @objc func singleTap(recog: UITapGestureRecognizer){
         let loc = recog.location(in: view)
+        let playerLocation = player.position
+        let posVariables = calcVector(firstLocation: playerLocation, secondLocation: loc)
+        player.zRotation = posVariables.theAngle
         fireLaser(tapLocation: loc)
     }
     
@@ -143,7 +146,7 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIGestureRecognizerDelegate 
         self.physicsWorld.gravity = CGVector(dx: 0, dy: 0)
         self.physicsWorld.contactDelegate = self
         
-        // Set touch gestures
+        
         
         //self.physicsBody = SKPhysicsBody(edgeLoopFrom: self.frame) //removed since it ibhibits wraparound,
         //updated to unique CGRect w/ padding
@@ -158,18 +161,21 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIGestureRecognizerDelegate 
 //            user.userDefaultGets()
 //        }
 //
-        self.singleTap = UITapGestureRecognizer(target: self, action: #selector(getter: self.singleTap))
+        // Set touch gestures
+        self.singleTap = UITapGestureRecognizer(target: self, action: #selector(singleTap(recog:)))
         self.singleTap.numberOfTapsRequired = 1
         self.singleTap.numberOfTouchesRequired = 1
-        self.view?.addGestureRecognizer(self.singleTap)
         self.singleTap.delegate = self
-        
-        self.longPress = UILongPressGestureRecognizer(target: self, action: #selector(getter: self.longPress))
-        self.longPress.minimumPressDuration = 0.5
+        view.addGestureRecognizer(self.singleTap)
+
+
+        self.longPress = UILongPressGestureRecognizer(target: self, action: #selector(longPress(recog:)))
+        self.longPress.minimumPressDuration = 0.25
         self.longPress.numberOfTapsRequired = 1
         self.longPress.numberOfTouchesRequired = 1
         self.longPress.allowableMovement = 50
-        self.view?.addGestureRecognizer(self.longPress)
+        self.longPress.delegate = self
+        view.addGestureRecognizer(self.longPress)
         
         // Sets up animation textures
         buildShark()
@@ -184,7 +190,6 @@ class GameScene: SKScene, SKPhysicsContactDelegate, UIGestureRecognizerDelegate 
     
     override func update(_ currentTime: TimeInterval) {
         infinityWrapUpdater(player)
-        
     }
     
     func infinityWrapUpdater(_ obj: SKSpriteNode){

@@ -32,7 +32,6 @@ class MainMenuScene: SKScene {
     
     override func didMove(to view: SKView) {
         
-        print(user.playerSkins)
         self.backgroundColor = BackgroundColor
         
         // Set up game title label
